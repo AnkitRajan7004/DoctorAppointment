@@ -3,28 +3,27 @@ import cookieParser from "cookie-parser";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import serverless from "serverless-http";
 
 // Import route files
-import authRoute from "./Routes/auth.js";
-import userRoute from "./Routes/user.js";
-import doctorRoute from "./Routes/doctor.js";
-import reviewRoute from "./Routes/review.js";
+import authRoute from "../Routes/auth.js";
+import userRoute from "../Routes/user.js";
+import doctorRoute from "../Routes/doctor.js";
+import reviewRoute from "../Routes/review.js";
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
-const port = process.env.PORT || 8000;
 
 // CORS options
 const corsOptions = {
-  origin: true, // Allow all origins
+  origin: true,
   credentials: true,
 };
 
 // MongoDB Connection Function
-mongoose.set('strictQuery', false);
-
+mongoose.set("strictQuery", false);
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URL);
@@ -33,6 +32,9 @@ const connectDB = async () => {
     console.error("❌ MongoDB connection failed:", err.message);
   }
 };
+
+// Connect to DB at cold start
+connectDB();
 
 // Middleware
 app.use(express.json());
@@ -50,8 +52,5 @@ app.get("/", (req, res) => {
   res.send("✅ API is working");
 });
 
-// Start the server
-app.listen(port, () => {
-  connectDB(); // Connect to MongoDB when server starts
-  console.log(`🚀 Server is running on port ${port}`);
-});
+// Export as a serverless handler
+export const handler = serverless(app);
