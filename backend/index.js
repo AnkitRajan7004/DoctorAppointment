@@ -56,7 +56,7 @@ app.use("/api/v1/users", userRoute);
 app.use("/api/v1/doctors", doctorRoute);
 app.use("/api/v1/reviews", reviewRoute);
 
-// ✅ Test route - Default response
+// Test route
 app.get("/", (req, res) => {
   res.send("Hello");
 });
