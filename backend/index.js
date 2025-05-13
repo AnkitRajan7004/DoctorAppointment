@@ -1,29 +1,31 @@
 import express from "express";
-import cookieParser from "cookie-parser";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
+import cookieParser from "cookie-parser";
 import serverless from "serverless-http";
 
 // Import route files
-import authRoute from "../Routes/auth.js";
-import userRoute from "../Routes/user.js";
-import doctorRoute from "../Routes/doctor.js";
-import reviewRoute from "../Routes/review.js";
+import authRoute from "./Routes/auth.js";
+import userRoute from "./Routes/user.js";
+import doctorRoute from "./Routes/doctor.js";
+import reviewRoute from "./Routes/review.js";
 
 // Load environment variables
 dotenv.config();
 
 const app = express();
+const port = process.env.PORT || 8000;
 
 // CORS options
 const corsOptions = {
-  origin: true,
+  origin: true, // Allow all origins
   credentials: true,
 };
 
 // MongoDB Connection Function
-mongoose.set("strictQuery", false);
+mongoose.set('strictQuery', false);
+
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URL);
