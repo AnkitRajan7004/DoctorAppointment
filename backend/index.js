@@ -1,9 +1,8 @@
 import express from "express";
+import cookieParser from "cookie-parser";
 import cors from "cors";
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import cookieParser from "cookie-parser";
-import serverless from "serverless-http";
 
 // Import route files
 import authRoute from "./Routes/auth.js";
@@ -17,15 +16,31 @@ dotenv.config();
 const app = express();
 const port = process.env.PORT || 8000;
 
-// CORS options
-const corsOptions = {
-  origin: true, // Allow all origins
-  credentials: true,
-};
+// ✅ Allow both local and deployed frontend
+const allowedOrigins = [
+  "http://localhost:3000", // for local development
+  "https://ankitdoctorappointment.vercel.app" // your deployed frontend
+];
 
-// MongoDB Connection Function
-mongoose.set('strictQuery', false);
+// ✅ CORS configuration
+app.use(cors({
+  origin: function (origin, callback) {
+    if (!origin || allowedOrigins.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error("Not allowed by CORS"));
+    }
+  },
+  methods: ["GET", "POST", "PUT", "DELETE"],
+  credentials: true
+}));
 
+// ✅ Middleware
+app.use(express.json());
+app.use(cookieParser());
+
+// ✅ MongoDB connection
+mongoose.set("strictQuery", false);
 const connectDB = async () => {
   try {
     await mongoose.connect(process.env.MONGO_URL);
@@ -35,24 +50,19 @@ const connectDB = async () => {
   }
 };
 
-// Connect to DB at cold start
-connectDB();
-
-// Middleware
-app.use(express.json());
-app.use(cookieParser());
-app.use(cors(corsOptions));
-
-// Routes
+// ✅ API routes
 app.use("/api/v1/auth", authRoute);
 app.use("/api/v1/users", userRoute);
 app.use("/api/v1/doctors", doctorRoute);
 app.use("/api/v1/reviews", reviewRoute);
 
-// Test route
+// ✅ Test route - Default response
 app.get("/", (req, res) => {
-  res.send("✅ API is working");
+  res.send("Hello");
 });
 
-// Export as a serverless handler
-export const handler = serverless(app);
+// ✅ Start server
+app.listen(port, () => {
+  connectDB();
+  console.log(`🚀 Server is running on port ${port}`);
+});
